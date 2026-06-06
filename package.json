@@ -1,9 +1,9 @@
 {
-  "name": "env-pass",
+  "name": "secret-safe-env",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "bin": { "env-pass": "dist/server.js" },
+  "bin": { "secret-safe-env": "dist/server.js" },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",

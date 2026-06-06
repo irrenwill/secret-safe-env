@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory = $true)][string]$Key,
     [Parameter(Mandatory = $true)][string]$EnvPath
 )
@@ -6,6 +6,19 @@ $ErrorActionPreference   = 'Stop'
 $VerbosePreference       = 'SilentlyContinue'
 $DebugPreference         = 'SilentlyContinue'
 $InformationPreference   = 'SilentlyContinue'
+
+# Hide THIS helper's own PowerShell console window by its handle (the masked dialog below is a
+# separate window and stays visible). Unlike Node's windowsHide -- which sets SW_HIDE on the process
+# and would hide the dialog too -- this targets only the console window. stdout is a redirected pipe,
+# unaffected by console visibility, so the OK/CANCEL/ERR token still reaches the parent.
+try {
+    Add-Type -Namespace EnvPass -Name Win -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("kernel32.dll")] public static extern System.IntPtr GetConsoleWindow();
+[System.Runtime.InteropServices.DllImport("user32.dll")] public static extern bool ShowWindow(System.IntPtr h, int n);
+'@
+    $cw = [EnvPass.Win]::GetConsoleWindow()
+    if ($cw -ne [System.IntPtr]::Zero) { [void][EnvPass.Win]::ShowWindow($cw, 0) }  # 0 = SW_HIDE
+} catch { }
 
 . "$PSScriptRoot/EnvUpsert.ps1"   # provides Emit, Invoke-EnvWrite, Write-EnvFile, Get-ErrorCode
 
@@ -22,7 +35,7 @@ function Show-SecretDialog {
     param([string]$Key, [string]$EnvPath)
     # Returns $true and sets $script:SecretValue on confirm; $false on cancel/empty.
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = 'env-pass'            # NEVER the value
+    $form.Text = 'secret-safe-env'     # app name; NEVER the value
     $form.TopMost = $true
     $form.StartPosition = 'CenterScreen'
     $form.FormBorderStyle = 'FixedDialog'
@@ -30,7 +43,7 @@ function Show-SecretDialog {
     $form.ClientSize = New-Object System.Drawing.Size(452, 170)
 
     $label = New-Object System.Windows.Forms.Label
-    $label.Text = "Paste value for $Key`r`n-> $EnvPath"
+    $label.Text = "請貼上 $Key 的祕密值（agent 看不到）`r`n寫入：$EnvPath"
     $label.SetBounds(12, 10, 428, 44)
     $form.Controls.Add($label)
 
@@ -53,19 +66,19 @@ function Show-SecretDialog {
     $form.Controls.Add($revealPanel)
 
     $eye = New-Object System.Windows.Forms.Button
-    $eye.Text = 'Hold to reveal'; $eye.SetBounds(338, 57, 102, 26); $eye.TabStop = $false
+    $eye.Text = '按住顯示'; $eye.SetBounds(338, 57, 102, 26); $eye.TabStop = $false
     $eye.Add_MouseDown({ $script:Revealing = $true;  $revealPanel.Invalidate() })
     $eye.Add_MouseUp(  { $script:Revealing = $false; $revealPanel.Invalidate() })
     $eye.Add_MouseLeave({ $script:Revealing = $false; $revealPanel.Invalidate() })  # re-mask if pointer leaves while held
     $form.Controls.Add($eye)
 
     $ok = New-Object System.Windows.Forms.Button
-    $ok.Text = 'OK'; $ok.SetBounds(254, 124, 86, 30)
+    $ok.Text = '確定'; $ok.SetBounds(254, 124, 86, 30)
     $ok.DialogResult = [System.Windows.Forms.DialogResult]::OK
     $form.Controls.Add($ok); $form.AcceptButton = $ok
 
     $cancel = New-Object System.Windows.Forms.Button
-    $cancel.Text = 'Cancel'; $cancel.SetBounds(346, 124, 86, 30)
+    $cancel.Text = '取消'; $cancel.SetBounds(346, 124, 86, 30)
     $cancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
     $form.Controls.Add($cancel); $form.CancelButton = $cancel
 

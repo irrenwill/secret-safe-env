@@ -5,7 +5,7 @@ import { validateKey, resolveEnvPath } from './validation.js';
 import { runDialog } from './dialogRunner.js';
 import { handleSetEnvSecret } from './handler.js';
 
-const server = new McpServer({ name: 'env-pass', version: '0.1.0' });
+const server = new McpServer({ name: 'secret-safe-env', version: '0.1.0' });
 
 server.registerTool(
   'set_env_secret',
