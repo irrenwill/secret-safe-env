@@ -12,6 +12,11 @@ permissions:
   contents: read
   id-token: write   # REQUIRED: lets npm exchange a GitHub OIDC token for a short-lived publish token
 
+# Opt the JavaScript actions (checkout, setup-node) into Node.js 24 ahead of GitHub's
+# 2026-06-16 forced switch, silencing the Node 20 deprecation warning.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
