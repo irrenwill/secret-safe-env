@@ -464,10 +464,11 @@ export function buildSpawnArgs(scriptPath: string, key: string, envPath: string)
 }
 
 /** shell:false (no shell parsing) and stderr discarded ('ignore') so a stray diagnostic line can
- *  never be captured (audit B2). windowsHide hides the PowerShell console window (the WinForms
- *  dialog is a separate top-level window and still shows). Returned as its own unit for testing. */
+ *  never be captured (audit B2). windowsHide MUST stay false: Node's windowsHide sets SW_HIDE on the
+ *  child STARTUPINFO, which a console process's first GUI window (the WinForms dialog) inherits -> the
+ *  dialog would be invisible. dialog.ps1 hides only its own console window (by handle) instead. */
 export function buildSpawnOptions(): { shell: false; windowsHide: boolean; stdio: ('ignore' | 'pipe')[] } {
-  return { shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] };
+  return { shell: false, windowsHide: false, stdio: ['ignore', 'pipe', 'ignore'] };
 }
 
 /** Spawns the dialog. The secret is NEVER passed in; the child returns only a status token on stdout. */
