@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import path from 'node:path';
 import { validateKey, resolveEnvPath } from '../src/validation.js';
 
@@ -16,11 +16,22 @@ describe('validateKey', () => {
 });
 
 describe('resolveEnvPath', () => {
-  it('defaults to .env in cwd', () => {
+  const ORIG = process.env.CLAUDE_PROJECT_DIR;
+  afterEach(() => {
+    if (ORIG === undefined) delete process.env.CLAUDE_PROJECT_DIR;
+    else process.env.CLAUDE_PROJECT_DIR = ORIG;
+  });
+
+  it('defaults to .env under CLAUDE_PROJECT_DIR when set', () => {
+    process.env.CLAUDE_PROJECT_DIR = 'C:\\proj';
+    expect(resolveEnvPath(undefined)).toBe(path.resolve('C:\\proj', '.env'));
+  });
+  it('falls back to <cwd>/.env when CLAUDE_PROJECT_DIR is unset', () => {
+    delete process.env.CLAUDE_PROJECT_DIR;
     expect(resolveEnvPath(undefined)).toBe(path.resolve(process.cwd(), '.env'));
   });
-  it('resolves a relative path to absolute', () => {
-    expect(resolveEnvPath('sub/.env')).toBe(path.resolve(process.cwd(), 'sub/.env'));
+  it('resolves an explicit relative path to absolute', () => {
+    expect(resolveEnvPath('sub/.env')).toBe(path.resolve('sub/.env'));
   });
   it('throws on a path starting with "-" (flag injection)', () => {
     expect(() => resolveEnvPath('-rf')).toThrow();
