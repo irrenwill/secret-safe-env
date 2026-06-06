@@ -140,3 +140,22 @@ Describe 'Invoke-EnvWrite: fixed status token + no value on any stream' {
         [System.IO.File]::ReadAllText($tr) | Should -Not -Match $sentinel
     }
 }
+
+Describe 'Test-KeyExists: value never reaches a stream or the transcript' {
+    It 'returns true and leaks no value to streams/transcript' {
+        $sentinel = 'SENTINEL-KE-3f9a'
+        $p  = Join-Path $script:TmpDir 'ke.env'
+        $tr = Join-Path $script:TmpDir 'ke-transcript.txt'
+        [System.IO.File]::WriteAllText($p, "A=1`nK=$sentinel`n")   # set BEFORE transcript
+        Start-Transcript -Path $tr -Force | Out-Null
+        $out = (Test-KeyExists -EnvPath $p -Key 'K') *>&1
+        Stop-Transcript | Out-Null
+        $out                               | Should -BeTrue
+        ($out | Out-String)                | Should -Not -Match $sentinel
+        [System.IO.File]::ReadAllText($tr) | Should -Not -Match $sentinel
+    }
+    It 'returns false for a missing key (no throw)' {
+        $p = Join-Path $script:TmpDir 'ke2.env'; [System.IO.File]::WriteAllText($p, "A=1`n")
+        Test-KeyExists -EnvPath $p -Key 'K' | Should -BeFalse
+    }
+}

@@ -66,6 +66,17 @@ function Get-ErrorCode {
 # Emit uses [Console]::Out (a .NET call, not Write-Output/Write-Host) — the value path stays clean.
 function Emit { param([string]$Token) [Console]::Out.WriteLine($Token) }
 
+function Test-KeyExists {
+    # Returns $true/$false for whether $Key exists in the .env at $EnvPath. The file (with values) is read
+    # via .NET and matched via Find-KeyLineIndex; values stay in this process and reach no output stream.
+    # Empty value (KEY=) counts as exists; a missing file returns $false.
+    param([string]$EnvPath, [string]$Key)
+    if (-not (Test-Path -LiteralPath $EnvPath)) { return $false }
+    $existing = [System.IO.File]::ReadAllText($EnvPath, [System.Text.Encoding]::UTF8)
+    $lines = if ($existing.Length -gt 0) { $existing -split "`r?`n" } else { [string[]]@() }
+    return (Find-KeyLineIndex -Lines $lines -Key $Key) -ge 0
+}
+
 function Invoke-EnvWrite {
     # Writes $script:SecretValue to .env and emits EXACTLY ONE fixed status token. The catch maps the
     # exception TYPE to a fixed code (audit A1) and NEVER references the exception message or the value
