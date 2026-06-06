@@ -1,6 +1,7 @@
 {
   "name": "secret-safe-env",
-  "version": "0.1.1",
+  "mcpName": "io.github.irrenwill/secret-safe-env",
+  "version": "0.1.2",
   "description": "MCP server that lets an agent write secrets into .env without ever seeing the value — user pastes into a native Windows masked dialog; PowerShell writes the file.",
   "keywords": [
     "mcp",

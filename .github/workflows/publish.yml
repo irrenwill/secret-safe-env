@@ -1,16 +1,17 @@
-name: Publish to npm
+name: Publish (npm + MCP Registry)
 
-# Publishes secret-safe-env to npm via Trusted Publishing (OIDC) — no long-lived token.
-# Triggers when you push a version tag, e.g.  git tag v0.1.1 && git push --tags
+# Publishes secret-safe-env to npm (Trusted Publishing / OIDC) AND lists it on the official
+# MCP Registry (mcp-publisher / OIDC) — both token-free. Tags-only trigger:
+#   git tag v0.1.2 && git push origin master --tags
+# The tag version MUST equal package.json's version (asserted below).
 on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: {}
 
 permissions:
   contents: read
-  id-token: write   # REQUIRED: lets npm exchange a GitHub OIDC token for a short-lived publish token
+  id-token: write   # REQUIRED for both npm Trusted Publishing and mcp-publisher github-oidc
 
 # Opt the JavaScript actions (checkout, setup-node) into Node.js 24 ahead of GitHub's
 # 2026-06-16 forced switch, silencing the Node 20 deprecation warning.
@@ -19,7 +20,7 @@ env:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   # github-hosted runner is required by npm Trusted Publishing
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,8 +28,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'   # npm Trusted Publishing requires Node >= 22.14
           registry-url: 'https://registry.npmjs.org'
+
+      # Single source of truth: the tag must equal package.json's version. Fail fast on drift,
+      # and export VERSION for the npm-propagation wait + server.json sync steps.
+      - name: Resolve and verify version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$VERSION" != "$PKG" ]; then
+            echo "::error::tag v$VERSION does not match package.json version $PKG"; exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Releasing $VERSION"
 
       # Trusted Publishing (OIDC) requires npm >= 11.5.1; ubuntu-latest ships an older npm.
       - name: Upgrade npm
@@ -47,3 +60,33 @@ jobs:
       # `npm publish` authenticates via OIDC and attaches build provenance automatically.
       - name: Publish to npm
         run: npm publish
+
+      # --- List on the official MCP Registry (token-free via GitHub OIDC) ---
+      # The registry validates ownership by fetching registry.npmjs.org/secret-safe-env/<version>
+      # and matching its mcpName — a single, un-retried GET. npm metadata can lag a few seconds
+      # after publish, so wait until the new version is visible WITH mcpName before publishing.
+      - name: Wait for npm to propagate the new version
+        run: |
+          for i in $(seq 1 15); do
+            if curl -fsS "https://registry.npmjs.org/secret-safe-env/${VERSION}" \
+                 | jq -e '.mcpName == "io.github.irrenwill/secret-safe-env"' >/dev/null 2>&1; then
+              echo "npm ${VERSION} is visible with mcpName"; exit 0
+            fi
+            echo "attempt $i/15: npm ${VERSION} not ready yet, sleeping 20s"; sleep 20
+          done
+          echo "::error::npm ${VERSION} did not propagate with mcpName in time"; exit 1
+
+      # OIDC runs inside irrenwill/secret-safe-env, which authorizes the io.github.irrenwill/* namespace.
+      - name: Install mcp-publisher
+        run: curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate to MCP Registry (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      # Keep server.json's version in lockstep with the verified release version.
+      - name: Sync server.json version
+        run: |
+          jq --arg v "$VERSION" '.version = $v | .packages[0].version = $v' server.json > server.tmp && mv server.tmp server.json
+
+      - name: Publish to MCP Registry
+        run: ./mcp-publisher publish
