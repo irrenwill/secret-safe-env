@@ -464,9 +464,10 @@ export function buildSpawnArgs(scriptPath: string, key: string, envPath: string)
 }
 
 /** shell:false (no shell parsing) and stderr discarded ('ignore') so a stray diagnostic line can
- *  never be captured (audit B2). Returned as its own unit so a test can assert these invariants. */
+ *  never be captured (audit B2). windowsHide hides the PowerShell console window (the WinForms
+ *  dialog is a separate top-level window and still shows). Returned as its own unit for testing. */
 export function buildSpawnOptions(): { shell: false; windowsHide: boolean; stdio: ('ignore' | 'pipe')[] } {
-  return { shell: false, windowsHide: false, stdio: ['ignore', 'pipe', 'ignore'] };
+  return { shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] };
 }
 
 /** Spawns the dialog. The secret is NEVER passed in; the child returns only a status token on stdout. */
