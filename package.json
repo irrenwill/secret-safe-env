@@ -1,12 +1,19 @@
 {
   "name": "secret-safe-env",
   "version": "0.1.0",
+  "description": "MCP server that lets an agent write secrets into .env without ever seeing the value — user pastes into a native Windows masked dialog; PowerShell writes the file.",
+  "keywords": ["mcp", "modelcontextprotocol", "secrets", "dotenv", "env", "windows", "powershell", "claude"],
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/irrenwill/secret-safe-env.git" },
+  "homepage": "https://github.com/irrenwill/secret-safe-env#readme",
+  "bugs": { "url": "https://github.com/irrenwill/secret-safe-env/issues" },
   "type": "module",
   "bin": { "secret-safe-env": "dist/server.js" },
   "files": ["dist", "scripts"],
   "engines": { "node": ">=18" },
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Invoke-Pester -Path ./test -Output Detailed\"",
     "lint:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/lint-value-path.ps1"

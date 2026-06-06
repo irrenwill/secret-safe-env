@@ -18,7 +18,7 @@ npm run lint:ps   # value-path 靜態 lint
 
 ## 安裝（一次性 global install）
 ```bash
-npm i -g github:irrenwill/secret-safe-env
+npm i -g secret-safe-env
 ```
 在專案的 `.mcp.json` 加入（啟動瞬間、不依賴網路）：
 ```json
@@ -26,7 +26,7 @@ npm i -g github:irrenwill/secret-safe-env
 ```
 重載 Claude Code。提供兩個工具：`set_env_secret`（讓使用者在本機遮罩框輸入 secret 寫進 .env，agent 永不看到值）與 `env_key_exists`（只回 true/false 確認寫入，不回值）。
 
-> 零安裝備援：`.mcp.json` 用 `{ "command": "npx", "args": ["-y", "github:irrenwill/secret-safe-env#<tag>"] }`（請釘 tag）。代價：每次 session 啟動會冷啟動，離線會啟動失敗。
+> 零安裝備援：`.mcp.json` 用 `{ "command": "npx", "args": ["-y", "secret-safe-env"] }`（建議釘版本，如 `secret-safe-env@0.1.0`）。代價：每次 session 啟動會冷啟動，離線會啟動失敗。
 
 > 值為單行；多行 PEM/JSON 請使用者自行編輯 .env。env_path 請傳專案根的絕對 .env 路徑。
 
