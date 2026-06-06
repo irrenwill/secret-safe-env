@@ -1,17 +1,19 @@
 {
   "name": "secret-safe-env",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "bin": { "secret-safe-env": "dist/server.js" },
+  "files": ["dist", "scripts"],
+  "engines": { "node": ">=18" },
   "scripts": {
     "build": "tsc",
+    "prepare": "tsc",
     "test": "vitest run",
-    "test:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Invoke-Pester -Path ./test/EnvUpsert.Tests.ps1 -Output Detailed\"",
+    "test:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Invoke-Pester -Path ./test -Output Detailed\"",
     "lint:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/lint-value-path.ps1"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
