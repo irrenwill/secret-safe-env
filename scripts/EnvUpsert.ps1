@@ -39,6 +39,10 @@ function Write-EnvFile {
     if ($lines.Count -gt 0 -and $lines[$lines.Count - 1] -eq '') { $lines.RemoveAt($lines.Count - 1) }
 
     $linesArr = if ($lines.Count -gt 0) { $lines.ToArray([string]) } else { [string[]]@() }
+    # NOTE: $linesArr holds EXISTING .env lines (which may include a PRIOR value) — passed by parameter
+    # here. The NEW value being entered never crosses a parameter boundary (it stays in
+    # $script:SecretValue). A prior value already on disk is out of scope (spec §13), and a [string[]]
+    # argument is recorded by TYPE, not expanded by element, in ParameterBinding/4103. Acceptable.
     $idx = Find-KeyLineIndex -Lines $linesArr -Key $Key
     $rendered = Render-CurrentLine -Key $Key   # value injected internally via $script:SecretValue
     if ($idx -ge 0) { $lines[$idx] = $rendered } else { [void]$lines.Add($rendered) }
