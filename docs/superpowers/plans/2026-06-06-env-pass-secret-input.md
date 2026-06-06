@@ -985,9 +985,10 @@ foreach ($t in $targets) {
         if ($cmd -and ($forbiddenCmds -contains $cmd)) { $violations.Add("${name}: forbidden command '$cmd'") }
         if ($c.InvocationOperator -eq 'Dot') {
             $first = $c.CommandElements[0]
-            if (-not ($first -is [System.Management.Automation.Language.StringConstantExpressionAst])) {
-                $violations.Add("${name}: dynamic dot-source of a non-literal")
-            }
+            # Allow string-literal dot-sources, including expandable strings like ". `"$PSScriptRoot/EnvUpsert.ps1`"".
+            # Only flag a genuinely dynamic source such as ". $var" / ". (expr)".
+            $isLiteral = ($first -is [System.Management.Automation.Language.StringConstantExpressionAst]) -or ($first -is [System.Management.Automation.Language.ExpandableStringExpressionAst])
+            if (-not $isLiteral) { $violations.Add("${name}: dynamic dot-source of a non-literal") }
         }
     }
     foreach ($m in $ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.MemberExpressionAst] }, $true)) {
