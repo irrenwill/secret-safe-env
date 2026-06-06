@@ -762,14 +762,22 @@ function Write-EnvFile {
     }
     $newline = if ($existing -match "`r`n") { "`r`n" } else { "`n" }
 
-    $lines = if ($existing.Length -gt 0) { [System.Collections.ArrayList]@($existing -split "`r?`n") } else { [System.Collections.ArrayList]@() }
+    # PS 5.1: build a resizable ArrayList explicitly (a cast wrapper is fixed-size; RemoveAt throws).
+    $lines = New-Object System.Collections.ArrayList
+    if ($existing.Length -gt 0) { foreach ($ln in ($existing -split "`r?`n")) { [void]$lines.Add($ln) } }
     if ($lines.Count -gt 0 -and $lines[$lines.Count - 1] -eq '') { $lines.RemoveAt($lines.Count - 1) }
 
-    $idx = Find-KeyLineIndex -Lines $lines.ToArray() -Key $Key
+    # PS 5.1: .ToArray() with no type arg unrolls to $null on an empty list — use a typed array + guard.
+    $linesArr = if ($lines.Count -gt 0) { $lines.ToArray([string]) } else { [string[]]@() }
+    # NOTE: $linesArr holds EXISTING .env lines (a prior value, if any) — passed by parameter here. The
+    # NEW value never crosses a parameter boundary (it stays in $script:SecretValue); a prior value on
+    # disk is out of scope (§13); and a [string[]] arg is logged by TYPE, not by element, in 4103.
+    $idx = Find-KeyLineIndex -Lines $linesArr -Key $Key
     $rendered = Render-CurrentLine -Key $Key   # value injected internally via $script:SecretValue
     if ($idx -ge 0) { $lines[$idx] = $rendered } else { [void]$lines.Add($rendered) }
 
-    $content = ($lines.ToArray() -join $newline) + $newline
+    $outArr = if ($lines.Count -gt 0) { $lines.ToArray([string]) } else { [string[]]@() }
+    $content = ($outArr -join $newline) + $newline
     $enc = New-Object System.Text.UTF8Encoding($false)   # UTF-8, no BOM
     [System.IO.File]::WriteAllText($EnvPath, $content, $enc)
 }
