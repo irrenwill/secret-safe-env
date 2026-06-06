@@ -34,5 +34,3 @@ npm run lint:ps   # value-path 靜態 lint
 **保護範圍**：從你貼上、到值寫入 `.env` 落地這一段，沒有任何受稽核的 Windows／agent 通道會記錄到值（PSReadLine、4688/Sysmon、4103/4104、Transcription、AMSI、MCP/agent 上下文、OTEL、mcp-debug）。
 
 **不在範圍**（由你自負）：值落地 `.env` 之後的處置——雲端同步／OneDrive、VSS／備份快照、防毒掃描、檔案 ACL、agent 事後讀取 `.env`。
-
-詳見 `docs/superpowers/specs/2026-06-06-env-pass-secret-input-design.md`。
