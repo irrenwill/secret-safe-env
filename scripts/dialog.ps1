@@ -35,13 +35,14 @@ function Show-SecretDialog {
     $form.Controls.Add($label)
 
     $txt = New-Object System.Windows.Forms.TextBox
-    $txt.UseSystemPasswordChar = $true
+    $txt.UseSystemPasswordChar = $true   # also sets the UIA "password" state, so screen readers announce "hidden"
     $txt.SetBounds(12, 58, 320, 24)
     $form.Controls.Add($txt)
 
     # Hold-to-reveal: owner-draw the plaintext as PIXELS only (no UIA-readable control Text).
     $revealPanel = New-Object System.Windows.Forms.Panel
     $revealPanel.SetBounds(12, 88, 428, 24)
+    $revealPanel.AccessibleRole = [System.Windows.Forms.AccessibleRole]::None  # explicit: keep the reveal out of the UIA tree
     $script:Revealing = $false
     $revealPanel.Add_Paint({
         param($s, $e)
@@ -72,7 +73,9 @@ function Show-SecretDialog {
     $form.Add_Shown({ $form.Activate(); $txt.Focus() })
     $result = $form.ShowDialog()
 
-    $confirmed = ($result -eq [System.Windows.Forms.DialogResult]::OK -and $txt.Text.Length -gt 0)
+    # All-whitespace counts as empty -> CANCEL (spec §10); the full untrimmed value is still what gets stored,
+    # so a real secret with leading/trailing spaces is preserved exactly.
+    $confirmed = ($result -eq [System.Windows.Forms.DialogResult]::OK -and $txt.Text.Trim().Length -gt 0)
     if ($confirmed) { $script:SecretValue = $txt.Text }
     $txt.Text = ''            # shorten plaintext residency in the control
     $form.Dispose()
