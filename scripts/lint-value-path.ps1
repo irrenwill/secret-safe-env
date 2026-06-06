@@ -2,7 +2,7 @@
 # AST-based: matches REAL invocations regardless of formatting, ignores comments/strings, and uses
 # EXACT command names (a Write-* wildcard would wrongly flag our own Write-EnvFile).
 $ErrorActionPreference = 'Stop'
-$targets = @("$PSScriptRoot/dialog.ps1", "$PSScriptRoot/EnvUpsert.ps1")
+$targets = @("$PSScriptRoot/dialog.ps1", "$PSScriptRoot/EnvUpsert.ps1", "$PSScriptRoot/KeyExists.ps1")
 
 $forbiddenCmds = @(
     'Set-Content','Add-Content','Out-File','Tee-Object','Export-Csv','Export-Clixml',
