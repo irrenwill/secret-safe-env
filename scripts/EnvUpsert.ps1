@@ -30,7 +30,7 @@ function Write-EnvFile {
     param([string]$EnvPath, [string]$Key)
     $existing = ''
     if (Test-Path -LiteralPath $EnvPath) {
-        $existing = [System.IO.File]::ReadAllText($EnvPath)
+        $existing = [System.IO.File]::ReadAllText($EnvPath, [System.Text.Encoding]::UTF8)  # explicit UTF-8, symmetric with the UTF-8 write below
     }
     $newline = if ($existing -match "`r`n") { "`r`n" } else { "`n" }
 

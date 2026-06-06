@@ -27,6 +27,9 @@ describe('buildSpawnOptions (audit E2/B2 invariants)', () => {
   it('discards child stderr (stdio = ignore, pipe, ignore)', () => {
     expect(buildSpawnOptions().stdio).toEqual(['ignore', 'pipe', 'ignore']);
   });
+  it('hides the PowerShell console window (windowsHide: true)', () => {
+    expect(buildSpawnOptions().windowsHide).toBe(true);
+  });
 });
 
 describe('resolvePowershell (audit E1: pinned PS 5.1, never PATH-resolved)', () => {
