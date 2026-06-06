@@ -7,7 +7,7 @@
   "engines": { "node": ">=18" },
   "scripts": {
     "build": "tsc",
-    "prepare": "tsc",
+    "prepare": "node ./node_modules/typescript/bin/tsc",
     "test": "vitest run",
     "test:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Invoke-Pester -Path ./test -Output Detailed\"",
     "lint:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/lint-value-path.ps1"
