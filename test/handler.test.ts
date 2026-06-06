@@ -3,6 +3,7 @@ import { handleSetEnvSecret, type HandlerDeps } from '../src/handler.js';
 
 function deps(over: Partial<HandlerDeps> = {}): HandlerDeps {
   return {
+    platform: 'win32',
     validateKey: () => true,
     resolveEnvPath: () => 'C:\\proj\\.env',
     runDialog: async () => 'OK',
@@ -70,5 +71,28 @@ describe('handleSetEnvSecret', () => {
     expect(r.isError).toBe(true);
     expect(r.text).not.toContain('ABC_DEF');
     expect(r.text).toContain('INTERNAL');
+  });
+
+  it('blocks non-Windows before running the dialog', async () => {
+    let ran = false;
+    const r = await handleSetEnvSecret(
+      { key: 'K' },
+      deps({ platform: 'linux', runDialog: async () => { ran = true; return 'OK'; } }),
+    );
+    expect(r.isError).toBe(true);
+    expect(r.text).toContain('Windows');
+    expect(ran).toBe(false);
+  });
+
+  it('OK text tells the agent to verify with env_key_exists and not cat .env', async () => {
+    const r = await handleSetEnvSecret({ key: 'OPENAI_API_KEY' }, deps());
+    expect(r.text).toContain('env_key_exists');
+    expect(r.text.toLowerCase()).toContain('do not cat');
+  });
+
+  it('CANCEL text tells the agent to ask retry/skip, not paste-in-chat', async () => {
+    const r = await handleSetEnvSecret({ key: 'K' }, deps({ runDialog: async () => 'CANCEL' }));
+    expect(r.text.toLowerCase()).toContain('retry');
+    expect(r.text.toLowerCase()).toContain('paste');
   });
 });

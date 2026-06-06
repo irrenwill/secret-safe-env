@@ -1,0 +1,44 @@
+name: Publish to npm
+
+# Publishes secret-safe-env to npm via Trusted Publishing (OIDC) — no long-lived token.
+# Triggers when you push a version tag, e.g.  git tag v0.1.1 && git push --tags
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write   # REQUIRED: lets npm exchange a GitHub OIDC token for a short-lived publish token
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted Publishing (OIDC) requires npm >= 11.5.1; ubuntu-latest ships an older npm.
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test (Node unit tests)
+        run: npm test
+
+      # No NODE_AUTH_TOKEN: with id-token: write + a configured Trusted Publisher on npmjs.com,
+      # `npm publish` authenticates via OIDC and attaches build provenance automatically.
+      - name: Publish to npm
+        run: npm publish
