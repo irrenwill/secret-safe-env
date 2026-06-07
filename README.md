@@ -11,6 +11,12 @@ The agent calls a tool with **only the variable name**. A native, masked Windows
 
 > 繁體中文說明見 [README.zh-TW.md](./README.zh-TW.md).
 
+## Demo
+
+![secret-safe-env demo — the agent calls the tool with only the key name; a masked dialog opens locally for you to type the value, which is written straight to .env](docs/demo.gif)
+
+<sub>▶︎ <a href="https://github.com/irrenwill/secret-safe-env/releases/download/v0.1.2/demo.mp4">Full-quality video (with audio)</a></sub>
+
 ---
 
 ## Why
