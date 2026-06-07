@@ -11,6 +11,12 @@ agent 只傳**變數名稱**;本機跳出一個原生遮罩對話框,由**你**�
 
 > English: see [README.md](./README.md).
 
+## Demo
+
+![secret-safe-env demo](docs/demo.gif)
+
+<sub>▶︎ <a href="https://github.com/irrenwill/secret-safe-env/releases/download/v0.1.2/demo.mp4">完整影片(含聲音)</a></sub>
+
 ---
 
 ## 為什麼
