@@ -51,15 +51,26 @@ When in doubt, add a test that proves a value cannot leak through the channel yo
 
 ## Releases (maintainers)
 
-Releases are automated and token-free. Bump the version, commit to `master`, then tag:
+Releases are automated and token-free, and **go through a pull request** — direct pushes to `master` are blocked by a branch ruleset, and `v*` tags can only be created by maintainers (a tag ruleset).
 
 ```bash
+# 1. Branch and bump the version (keeps package-lock.json in sync)
+git checkout -b release/v<x.y.z>
 npm version <x.y.z> --no-git-tag-version
-git commit -am "chore: bump to <x.y.z>"
-git tag v<x.y.z> && git push origin master --tags
+git commit -am "chore: release v<x.y.z>"
+git push -u origin release/v<x.y.z>
+
+# 2. Open a PR and merge it into master — this is the review gate
+gh pr create --title "chore: release v<x.y.z>" --body "Release v<x.y.z>"
+#    ...review, then merge via the UI or: gh pr merge --merge
+
+# 3. Tag the merged commit to trigger publishing (tags cannot go through a PR;
+#    the version bump must already be on master, and the tag must match it)
+git checkout master && git pull
+git tag v<x.y.z> && git push origin v<x.y.z>
 ```
 
-A tag push runs `.github/workflows/publish.yml`, which publishes to npm (Trusted Publishing / OIDC) and lists on the MCP Registry (`mcp-publisher` / OIDC). The same version cannot be re-published — if a run half-fails, bump a new patch version rather than re-running the tag. Details in [docs/DECISIONS.md](./docs/DECISIONS.md) D13–D15.
+Step 3's tag push runs `.github/workflows/publish.yml`, which publishes to npm (Trusted Publishing / OIDC) and lists on the MCP Registry (`mcp-publisher` / OIDC). The workflow asserts the tag equals `package.json`'s version. The same version cannot be re-published — if a run half-fails, start a new patch version rather than re-running the tag. Details in [docs/DECISIONS.md](./docs/DECISIONS.md) D13–D16.
 
 ## Reporting a security issue
 
