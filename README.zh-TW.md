@@ -140,3 +140,9 @@ PowerShell 測試需 Pester 5:`Install-Module Pester -MinimumVersion 5.0 -Scope 
 ## 授權
 
 [MIT](./LICENSE)
+
+## 免責聲明
+
+`secret-safe-env` 以「現狀」提供,不附帶任何形式的擔保(見 [LICENSE](./LICENSE))。它在文件所述的[安全範圍](#安全範圍)內盡力降低祕密外洩,**不保證絕對保密**。你需自行確認它符合你的威脅模型,並自負祕密值**寫入 `.env` 之後**的一切處置 —— 雲端同步、備份、防毒、檔案權限,以及任何事後讀取 `.env` 的工具(包含 agent)。正式環境的祕密請改用專門的密鑰管理工具。
+
+本專案為獨立開源專案,**未**與 Anthropic、「Claude」或 Model Context Protocol 專案有任何隸屬、背書或贊助關係;相關名稱為其各自所有者之商標,此處僅用於描述相容性。

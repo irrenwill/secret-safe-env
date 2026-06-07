@@ -140,3 +140,9 @@ Contributions welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). The one rule
 ## License
 
 [MIT](./LICENSE)
+
+## Disclaimer
+
+`secret-safe-env` is provided "as is", without warranty of any kind (see [LICENSE](./LICENSE)). It reduces secret exposure within the documented [security scope](#security-scope) on a best-effort basis; it does **not** guarantee absolute secrecy. You are responsible for confirming it fits your threat model, and for whatever happens to a value **after** it is written to `.env` — cloud sync, backups, antivirus, file permissions, and any tool (including the agent) that later reads `.env`. For production secrets, prefer a dedicated secrets manager.
+
+This is an independent open-source project. It is **not** affiliated with, endorsed by, or sponsored by Anthropic, "Claude", or the Model Context Protocol project; those names belong to their respective owners and are used only to describe compatibility.
