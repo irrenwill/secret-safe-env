@@ -54,3 +54,8 @@ A log of the load-bearing decisions and *why* they are the way they are. Format:
 
 ### D15. List on the official MCP Registry (discovery), package stays on npm (artifact)
 **Rationale:** the registry hosts metadata only and points at the npm package; it broadens discovery (and downstream aggregators sync from it). **Consequence:** `package.json` carries `mcpName`, a root `server.json` is the registry manifest, and the server is listed as `io.github.irrenwill/secret-safe-env`. Note: as of 2026-06 Claude Code does not yet install *from* the registry, so install still resolves to the npm package.
+
+## Governance
+
+### D16. Branch + tag protection; releases go through a pull request
+**Rationale:** `master` is the ref CI and Trusted Publishing trust, and a `v*` tag push triggers an **irreversible** publish to npm + the MCP Registry — so both refs need guarding against accidental or unauthorized changes (e.g. a future collaborator or a leaked write token, since the OIDC publish is scoped to the repo, not to a person). **Consequence:** a `master` ruleset requires a pull request for all changes (no admin direct-push) and blocks force-push/deletion; a tag ruleset restricts creating/updating/deleting `v*` tags to maintainers (bypass). Releases therefore go **branch → bump version → PR → merge → a maintainer pushes the `v*` tag** (tags can't be PR'd), which runs the publish workflow. GitHub rulesets do not defend against a compromised *admin* account — that is covered by GitHub + npm 2FA and the repo-scoped Trusted Publisher.
