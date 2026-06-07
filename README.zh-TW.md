@@ -38,6 +38,10 @@ agent: set_env_secret({ key: "OPENAI_API_KEY" })
 agent 收到:  "OK"   ← 只有狀態 token
 ```
 
+### 「我自己手動編輯 `.env` 不就好了?」
+
+可以,而且這工具不取代手動 —— 它取代的是「每次離開對話 → 開檔 → 貼上」這個重複動作,讓 agent 在自己的流程裡順手做掉,你只負責貼那一下。它防的洩漏面也跟 `.gitignore` **不同**:就算 `.env` 乖乖不進 git,你在「交出值的那一刻」貼進聊天、或讓 agent 讀到,值就已經進了模型上下文 / transcript / log。範圍刻意只到「安全把值送進 `.env`」—— 正式環境的 vault、執行期注入是下游別的工具的事,不在範圍內。
+
 ## 平台支援
 
 本工具**刻意只支援 Windows** —— 信任基礎是由 Windows PowerShell 驅動的原生 WinForms 遮罩對話框。

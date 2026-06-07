@@ -38,6 +38,10 @@ agent: set_env_secret({ key: "OPENAI_API_KEY" })
 agent receives:  "OK"   ← status token only
 ```
 
+### "Can't I just edit `.env` myself?"
+
+Yes — and this doesn't replace that. It removes the repetitive *leave the chat → open the file → paste* step so the agent handles it inline, with you only typing the value once. It also guards a **different** surface than `.gitignore`: keeping `.env` out of git doesn't help if the value already leaked into the chat / transcript / logs the moment you handed it over. Scope is deliberately just *getting the value safely into `.env`* — production secret management (vaults, runtime injection) is out of scope.
+
 ## Platform support
 
 This tool is **Windows-only by design** — the trust anchor is a native WinForms masked dialog driven by Windows PowerShell.
