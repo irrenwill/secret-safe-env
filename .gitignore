@@ -3,4 +3,7 @@ dist/
 .env
 *.env
 *.log
-docs/
+
+# Local-only working docs (kept out of the public repo). Public docs live in docs/*.md.
+docs/superpowers/
+docs/npm-2fa-publishing-guide.md
