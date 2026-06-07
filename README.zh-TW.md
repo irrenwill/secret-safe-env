@@ -127,6 +127,10 @@ PowerShell 測試需 Pester 5:`Install-Module Pester -MinimumVersion 5.0 -Scope 
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) —— 模組與資料流。
 - [docs/DECISIONS.md](./docs/DECISIONS.md) —— 設計決策與理由。
 
+## 參與貢獻
+
+歡迎貢獻 —— 見 [CONTRIBUTING.md](./CONTRIBUTING.md)。唯一鐵則:維持「值不外洩」的保證並有測試覆蓋。
+
 ## 授權
 
 [MIT](./LICENSE)

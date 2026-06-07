@@ -127,6 +127,10 @@ Releases are automated: push a `vX.Y.Z` tag and GitHub Actions publishes to npm 
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — modules and data flow.
 - [docs/DECISIONS.md](./docs/DECISIONS.md) — design decisions and rationale.
 
+## Contributing
+
+Contributions welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). The one rule: keep the no-leak guarantee intact and tested.
+
 ## License
 
 [MIT](./LICENSE)
